@@ -1,0 +1,741 @@
+#include<LiquidCrystal.h>
+#include<dht.h>
+#include <SoftwareSerial.h>
+
+#define SIM800_TX_PIN 1
+ 
+#define SIM800_RX_PIN 0
+
+SoftwareSerial serialSIM800(SIM800_TX_PIN,SIM800_RX_PIN);
+
+#define dht_dpin A1
+
+LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
+
+dht DHT;
+
+#define heater 10
+#define fan 8
+#define spray 11
+#define pump 12
+#define soil 9
+#define dehumidifier 13
+int buttonPin = A0;
+int temperature, humidity, temp,Temp;
+int check;
+int test,test1,test2,test3;
+float volt,value;
+int buttonState = 0;
+byte degree[8] =
+              {
+                0b00011,
+                0b00011,
+                0b00000,
+                0b00000,
+                0b00000,
+                0b00000,
+                0b00000,
+                0b00000
+              };
+
+void setup()
+{
+  Serial.begin(9600);
+  lcd.begin(16,2);
+   while(!Serial);
+  Serial.println("Setup Complete!");
+  Serial.println("Sending SMS...");
+   
+  //Set SMS format to ASCII
+  serialSIM800.write("AT+CMGF=1\r\n");
+  delay(1000);
+ 
+  //Send new SMS command and message number
+  serialSIM800.write("AT+CMGS=\"0030+++\"\r\n");
+  delay(1000);
+   
+  //Send SMS content
+  serialSIM800.write("TEST");
+  delay(1000);
+   
+  //Send Ctrl+Z / ESC to denote SMS message is complete
+  serialSIM800.write((char)26);
+  delay(1000);
+     
+  Serial.println("SMS Sent!");
+
+  pinMode(buttonPin, INPUT);
+  pinMode(soil, INPUT);
+  pinMode(heater, OUTPUT);
+  pinMode(fan, OUTPUT);
+  pinMode(spray, OUTPUT);
+  pinMode(pump, OUTPUT);
+  pinMode(dehumidifier, OUTPUT);
+ 
+  lcd.createChar(1, degree);
+  lcd.setCursor(0,0);
+  lcd.print("    Growroom");
+  lcd.setCursor(0,1);
+  lcd.print("   Monitoring");
+  delay(5000);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("   By Kolias");
+  lcd.setCursor(0,1);
+  lcd.print("  Electronics");
+  delay(5000);
+  lcd.clear();
+}
+
+void loop()
+{
+ 
+ buttonState = digitalRead(buttonPin);
+
+  DHT.read11(dht_dpin);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(" Humidity=");
+  lcd.print(humidity=DHT.humidity);
+  lcd.print(" % ");
+// lcd.clear();
+  lcd.setCursor(0,1);
+  lcd.print("Temperature=");
+  lcd.print(temperature=DHT.temperature);
+  lcd.write(1);
+  lcd.print("C ");
+  delay(5000);
+  lcd.clear();
+
+
+  if(buttonState == LOW)
+   if(temperature < 20)
+   {
+     digitalWrite(heater, HIGH);
+     Serial.println("VEGGIE PERIOD");
+     Serial.println("LOW TEMPERATURE ");
+     Serial.println("HEATER TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Low Temperature ");
+     lcd.setCursor(0,1);
+     lcd.print("Heater turned ON");
+     check=1;
+     test=1;
+     delay(3000);
+      lcd.clear();
+       lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Temperature");
+     lcd.setCursor(0,1);
+     lcd.print(temperature);
+     lcd.write(1);
+     lcd.print("C");
+     check=2;
+     test2=1;
+     delay(2000);
+  lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Veggie Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == LOW)
+    if(check==1)
+    {
+     Serial.println("VEGGIE PERIOD ");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+       lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print(" Veggie Period ");
+     check=1;
+     test=1;
+     delay(2000);
+     lcd.setCursor(0,0);
+     lcd.print("Ideal Hum:50-70%");
+     lcd.setCursor(0,1);
+     lcd.print("    Temp:20-30*C");
+     delay(5000);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(" Humidity=");
+  lcd.print(humidity=DHT.humidity);
+  lcd.print(" % ");
+// lcd.clear();
+  lcd.setCursor(0,1);
+  lcd.print("Temperature=");
+  lcd.print(temperature=DHT.temperature);
+  lcd.write(1);
+  lcd.print("C ");
+  delay(5000);
+  lcd.clear();
+
+
+     
+    }
+     digitalWrite(heater, LOW);
+     test=0;
+     delay(2000);
+   }
+  
+ 
+ if(buttonState == LOW)
+  if(temperature > 28)
+  {
+    digitalWrite(fan, HIGH);
+    Serial.println("VEGGIE PERIOD");
+     Serial.println("HIGH TEMPERATURE");
+     Serial.println("FAN TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+  
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("High Temperature");
+     lcd.setCursor(0,1);
+     lcd.print("Fan Turned ON  ");
+     delay(3000);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Temperature");
+     lcd.setCursor(0,1);
+     lcd.print(temperature);
+     lcd.write(1);
+     lcd.print("C");
+     check=2;
+     test2=1;
+     delay(3000);
+      lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Veggie Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == LOW)
+    if(check==2)
+    {
+      
+     Serial.println("FAN TURNED OFF");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println("Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+         
+     Serial.write(26);
+     check=0;
+     test1=0;
+    }
+   digitalWrite(fan, LOW);
+   delay(1000);
+   }
+
+ if(buttonState == LOW)
+  if(humidity < 50)
+  {
+     Serial.println("VEGGIE PERIOD");
+     digitalWrite(spray, HIGH);
+     Serial.println("LOW HUMIDITY ");
+     Serial.println("SPRAY TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");  
+   
+    
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Low Humidity");
+     lcd.setCursor(0,1);
+     lcd.print("Spray Turned ON  ");
+     delay(3000);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Humidity");
+     lcd.setCursor(0,1);
+     lcd.print(humidity);
+     lcd.print(" %");
+     check=3;
+     test2=1;
+     delay(3000);
+      lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Veggie Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == LOW)
+    if(check==3)
+    {
+     Serial.println("SPRAY TURNED OFF");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+    }
+     digitalWrite(spray, LOW);
+     test2=0;
+     delay(2000);
+  }
+  if(buttonState == LOW)
+  if(humidity > 70)
+  {
+     Serial.println("VEGGIE PERIOD");
+     digitalWrite(dehumidifier, HIGH);
+     Serial.println("HIGH HUMIDITY ");
+     Serial.println("DEHUMIDIFIER TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");  
+    
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("High Humidity ");
+     lcd.setCursor(0,1);
+     lcd.print("Dehumidifier ON");
+     delay(3000);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Humidity");
+     lcd.setCursor(0,1);
+     lcd.print(humidity);
+     lcd.print(" %");
+     check=3;
+     test2=1;
+     delay(2000);
+       lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Veggie Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == LOW)
+    if(check==3)
+    {
+     Serial.println("DEHUMIDIFIER TURNED OFF");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+    }
+     digitalWrite(dehumidifier, LOW);
+     test2=0;
+     delay(2000);
+  } 
+
+  if(buttonState == LOW)
+   if(digitalRead(soil)==1)
+   {
+    digitalWrite(pump, HIGH);
+    
+     Serial.println("VEGGIE PERIOD");
+     Serial.println("WATER REQUIRED ");
+     Serial.println("PUMP TURNED ON ");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+    check=4;
+    test3=1;
+    lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Water Required ");
+     lcd.setCursor(0,1);
+     lcd.print("Pump turned ON");
+     delay(3000);
+      lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Veggie Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+    
+  else
+  {
+    if(buttonState == LOW)
+    if(check==4)
+    {
+     Serial.println("WATER COMPLETED ");
+     Serial.println("PUMP TURNED OFF ");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+    }
+   digitalWrite(pump, LOW);
+   test3=0;
+  }
+  delay(100);
+
+
+ if(buttonState == HIGH)
+   if(temperature < 18)
+   {
+     digitalWrite(heater, HIGH);
+     Serial.println("FLOWERING PERIOD");
+     Serial.println("LOW TEMPERATURE ");
+     Serial.println("HEATER TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Low Temperature ");
+     lcd.setCursor(0,1);
+     lcd.print("Heater turned ON");
+     check=1;
+     test=1;
+     delay(3000);
+      lcd.clear();
+       lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Temperature");
+     lcd.setCursor(0,1);
+     lcd.print(temperature);
+     lcd.write(1);
+     lcd.print("C");
+     check=2;
+     test2=1;
+     delay(2000);
+  lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Flowering Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == HIGH)
+    if(check==1)
+    {
+     Serial.println("FLOWERING PERIOD ");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Flowering Period ");
+     check=1;
+     test=1;
+     delay(2000);
+     lcd.setCursor(0,0);
+     lcd.print("Ideal Hum:40-50%");
+     lcd.setCursor(0,1);
+     lcd.print("    Temp:18-26*C");
+     delay(5000);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(" Humidity=");
+  lcd.print(humidity=DHT.humidity);
+  lcd.print(" % ");
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(" Humidity=");
+  lcd.print(humidity=DHT.humidity);
+  lcd.print(" % ");
+// lcd.clear();
+  lcd.setCursor(0,1);
+  lcd.print("Temperature=");
+  lcd.print(temperature=DHT.temperature);
+  lcd.write(1);
+  lcd.print("C ");
+  delay(5000);
+  lcd.clear();
+
+
+    }
+     digitalWrite(heater, LOW);
+     test=0;
+     delay(200);
+   }
+  
+ 
+ if(buttonState == HIGH)
+  if(temperature > 25)
+  {
+    digitalWrite(fan, HIGH);
+    Serial.println("FLOWERING PERIOD");
+     Serial.println("HIGH TEMPERATURE");
+     Serial.println("FAN TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+  
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("High Temperature ");
+     lcd.setCursor(0,1);
+     lcd.print("Fan Turned ON  ");
+     delay(3000);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Temperature");
+     lcd.setCursor(0,1);
+     lcd.print(temperature);
+     lcd.write(1);
+     lcd.print("C");
+     check=2;
+     test2=1;
+     delay(2000);
+      lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Flowering Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == HIGH)
+    if(check==2)
+    {
+    
+     Serial.println("FAN TURNED OFF");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+    
+     Serial.write(26);
+     check=0;
+     test1=0;
+    }
+   digitalWrite(fan, LOW);
+   delay(1000);
+   }
+
+ if(buttonState == HIGH)
+  if(humidity < 40)
+  {
+     digitalWrite(spray, HIGH);
+     Serial.println("FLOWERING PERIOD");
+     Serial.println("LOW HUMIDITY ");
+     Serial.println("SPRAY TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");  
+    
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Low Humidity");
+     lcd.setCursor(0,1);
+     lcd.print("Spray Turned ON  ");
+     delay(3000);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Humidity");
+     lcd.setCursor(0,1);
+     lcd.print(humidity);
+     lcd.print(" %");
+     check=3;
+     test2=1;
+     delay(2000);
+      lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Flowering Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == HIGH)
+    if(check==3)
+    {
+     Serial.println("SPRAY TURNED OFF");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+    }
+     digitalWrite(spray, LOW);
+     test2=0;
+     delay(2000);
+  }
+ if(buttonState == HIGH)
+  if(humidity > 50)
+  {
+     Serial.println("FLOWERING PERIOD");
+     digitalWrite(dehumidifier, HIGH);
+     Serial.println("HIGH HUMIDITY ");
+     Serial.println("DEHUMIDIFIER TURNED ON");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");  
+    
+     Serial.write(26);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("High Humidity ");
+     lcd.setCursor(0,1);
+     lcd.print("Dehumidifier ON");
+     delay(3000);
+     lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Humidity");
+     lcd.setCursor(0,1);
+     lcd.print(humidity);
+     lcd.print(" %");
+     check=3;
+     test2=1;
+     delay(2000);
+       lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Flowering Period ");
+     check=1;
+     test=1;
+     delay(2000);
+   }
+   else
+   {
+    if(buttonState == HIGH)
+    if(check==3)
+    {
+     Serial.println("DEHUMIDIFIER TURNED OFF");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+    }
+     digitalWrite(dehumidifier, LOW);
+     test2=0;
+     delay(2000); 
+   }
+  if(buttonState == HIGH)
+   if(digitalRead(soil)==1)
+   {
+    digitalWrite(pump, HIGH);
+
+    Serial.println("FLOWERING PERIOD");
+     Serial.println("WATER REQUIRED ");
+     Serial.println("PUMP TURNED ON ");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+    check=4;
+    test3=1;
+    lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Water Required ");
+     lcd.setCursor(0,1);
+     lcd.print("Pump turned ON");
+      lcd.clear();
+     lcd.setCursor(0,0);
+     lcd.print("Flowering Period ");
+     check=1;
+     test=1;
+     delay(3000);
+  
+   }
+    
+  else
+  {
+    if(buttonState == HIGH)
+    if(check==4)
+    {
+     Serial.println("WATER COMPLETED ");
+     Serial.println("PUMP TURNED OFF ");
+     Serial.print("Temperature: ");
+     Serial.print(temperature);
+     Serial.println(" Degree Celsius");
+     Serial.print("Humidity: ");
+     Serial.print(humidity);
+     Serial.println(" %");
+     Serial.write(26);
+     check=0;
+    }
+   digitalWrite(pump, LOW);
+   test3=0;
+  }
+  delay(100);
+}
